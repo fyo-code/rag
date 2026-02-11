@@ -1,0 +1,7 @@
+pandas
+duckdb
+langchain-chroma
+langchain-google-genai
+python-dotenv
+openpyxl
+tqdm
