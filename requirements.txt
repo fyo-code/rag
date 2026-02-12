@@ -5,3 +5,6 @@ langchain-google-genai
 python-dotenv
 openpyxl
 tqdm
+fastapi
+uvicorn
+python-multipart
