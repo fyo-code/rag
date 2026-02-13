@@ -32,14 +32,24 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS for frontend
+# --- CORS CONFIGURATION (START) ---
+# This allows the Frontend to talk to the Backend
+# We read the allowed origin from Render, or default to "*" (allow everyone) for safety.
+
+origins = [
+    "*",                          # Allow everything (Easiest for debugging)
+    "http://localhost:3000",      # Allow local testing
+    os.getenv("FRONTEND_URL"),    # Allow the specific Vercel URL if set
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=["*"],          # HARDCODED ALLOW ALL to guarantee fix
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# --- CORS CONFIGURATION (END) ---
 
 
 # Request/Response models
