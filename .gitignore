@@ -17,5 +17,4 @@ build/
 coverage/
 tsc_output/
 chroma_db/
-.agent/
 render.yaml
