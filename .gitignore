@@ -18,3 +18,4 @@ coverage/
 tsc_output/
 chroma_db/
 render.yaml
+.agent
