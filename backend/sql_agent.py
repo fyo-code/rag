@@ -7,6 +7,7 @@ Smart aggregation: prefers charts/insights over raw data dumps
 import os
 import json
 import re
+import duckdb
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -27,6 +28,13 @@ def get_sql_system_prompt() -> str:
     return f"""Ești un expert SQL pentru DuckDB. Generează interogări SQL precise bazate pe întrebările utilizatorului.
 
 {schema}
+
+DETECȚIE INTENȚIE (MODURI SPECIALE DE RĂSPUNS):
+1. Daca utilizatorul pune 2 intrebari total diferite in aceeasi propozitie (ex: "Top 10 X si Top 10 Y"), NU genera SQL. 
+   Returneaza DOAR textul: "MULTI_PART"
+2. Daca intrebarea este complet irelevanta pentru reclamatii/mobexpert (ex: "Cine e presedintele?", "Care e cea mai rapida masina?", "Invata-ma python"), NU genera SQL.
+   Returneaza DOAR textul: "IRRELEVANT"
+3. Daca intrebarea este valida, genereaza SQL normal conform regulilor de mai jos.
 
 REGULI STRICTE:
 1. Returnează DOAR interogarea SQL, fără explicații
@@ -218,6 +226,12 @@ def generate_sql(question: str) -> tuple[str, str | None]:
         )
         
         sql = response.text.strip()
+        
+        # Handle Intent Flags
+        if "MULTI_PART" in sql:
+            return "", "Te rog să îmi adresezi câte o singură întrebare pe rând. (Ex: 'Top 10...' și apoi 'Cele mai scumpe...')"
+        if "IRRELEVANT" in sql:
+            return "", "Nu am informații despre acest subiect. Răspund doar la întrebări despre reclamațiile Mobexpert."
         
         # Clean up SQL (remove markdown code blocks if present)
         sql = re.sub(r'^```sql\s*', '', sql)
@@ -619,7 +633,19 @@ def chat(question: str) -> dict:
         }
     
     # Step 2: Execute SQL
-    results, columns, exec_error = execute_query(sql)
+    try:
+        results, columns, exec_error = execute_query(sql)
+    except (duckdb.ParserException, duckdb.BinderException) as e:
+        return {
+            "text": "Am întâmpinat o eroare internă (interogare prea complexă). Te rog să reformulezi sau să simplifici întrebarea.",
+            "visualization": "none",
+            "error": True
+        }
+    except Exception as e:
+        exec_error = str(e)
+        results = []
+        columns = []
+
     if exec_error:
         return {
             "text": f"Eroare la executarea interogării: {exec_error}",

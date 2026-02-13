@@ -250,10 +250,10 @@ export default function ChatPage() {
             data={chartData as Record<string, string | number>[]}
             index={xKey}
             categories={[yKey]}
-            colors={["amber"]}
+            colors={["orange"]}
             className="h-72"
             showAnimation
-            yAxisWidth={70}
+            yAxisWidth={85}
             showLegend={false}
             valueFormatter={(v) => v.toLocaleString("ro-RO")}
           />
@@ -283,7 +283,7 @@ export default function ChatPage() {
             data={chartData as Record<string, string | number>[]}
             index={nameKey}
             category={valueKey}
-            colors={["amber", "red", "emerald", "blue", "violet", "pink", "teal", "orange"]}
+            colors={["orange", "red", "emerald", "blue", "violet", "pink", "teal", "orange"]}
             className="h-64"
             showAnimation
             showLabel={false}
